@@ -3,6 +3,7 @@ package com.supets.map;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -57,17 +58,34 @@ public class BaseMapActivity extends BaseLocationActivity {
         initMapEvent();
         initOritationListener();
 
-
-        mMapView.setOnTouchListener(new View.OnTouchListener() {
+        mMapView.getMap().setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public void onMapStatusChangeStart(MapStatus mapStatus) {
+
+            }
+
+            @Override
+            public void onMapStatusChange(MapStatus mapStatus) {
+
+            }
+
+            //需求是这样的，手动滑动地图停止后，直接获取到当前地图中心坐标的经纬度
+            public void onMapStatusChangeFinish(MapStatus status) {
+                LatLng _latLng = status.target;
+                System.out.println(_latLng.latitude + "," + _latLng.longitude);
+            }
+        });
+
+
+        mMapView.getMap().setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
+            @Override
+            public void onTouch(MotionEvent motionEvent) {
                 /** 获得屏幕点击的位置 */
                 int x = (int) motionEvent.getX();
                 int y = (int) motionEvent.getY();
                 // 像素坐标转换为地址坐标
-                LatLng pt = mMapView.getMap().getProjection().fromScreenLocation(new Point(x,y));
-                Log.v("dd",x + ":" + y + ":" + pt.latitude + pt.longitude);
-                return false;
+                LatLng pt = mMapView.getMap().getProjection().fromScreenLocation(new Point(x, y));
+                Log.v("dd", x + ":" + y + ":" + pt.latitudeE6 + pt.longitudeE6);
             }
         });
 
