@@ -2,7 +2,10 @@ package com.supets.map;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
 import com.baidu.location.Poi;
+import com.baidu.mapapi.map.MyLocationData;
+import com.supets.map.marker.MyOrientationListener;
 import com.supets.map.service.LocationService;
 
 import android.app.Activity;
@@ -22,48 +25,7 @@ import android.widget.TextView;
  *
  */
 public class BaseLocationActivity extends Activity {
-    private LocationService locationService;
-    private TextView LocationResult;
-    private Button startLocation;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        LocationResult = findViewById(R.id.textView1);
-        LocationResult.setMovementMethod(ScrollingMovementMethod.getInstance());
-        startLocation = findViewById(R.id.addfence);
-
-    }
-
-    /**
-     * 显示请求字符串
-     *
-     * @param str
-     */
-    public void logMsg(String str) {
-        final String s = str;
-        try {
-            if (LocationResult != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LocationResult.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                LocationResult.setText(s);
-                            }
-                        });
-
-                    }
-                }).start();
-            }
-            //LocationResult.setText(str);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    public LocationService locationService;
 
 
     /***
@@ -71,7 +33,6 @@ public class BaseLocationActivity extends Activity {
      */
     @Override
     protected void onStop() {
-        // TODO Auto-generated method stub
         locationService.unregisterListener(mListener); //注销掉监听
         locationService.stop(); //停止定位服务
         super.onStop();
@@ -79,7 +40,6 @@ public class BaseLocationActivity extends Activity {
 
     @Override
     protected void onStart() {
-        // TODO Auto-generated method stub
         super.onStart();
         // -----------location config ------------
         locationService = ((LocationApplication) getApplication()).locationService;
@@ -92,20 +52,6 @@ public class BaseLocationActivity extends Activity {
         } else if (type == 1) {
             locationService.setLocationOption(locationService.getOption());
         }
-        startLocation.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (startLocation.getText().toString().equals("开始定位")) {
-                    locationService.start();// 定位SDK
-                    // start之后会默认发起一次定位请求，开发者无须判断isstart并主动调用request
-                    startLocation.setText("停止定位");
-                } else {
-                    locationService.stop();
-                    startLocation.setText("开始定位");
-                }
-            }
-        });
     }
 
 
@@ -114,11 +60,10 @@ public class BaseLocationActivity extends Activity {
      * 定位结果回调，重写onReceiveLocation方法，可以直接拷贝如下代码到自己工程中修改
      *
      */
-    private BDAbstractLocationListener mListener = new BDAbstractLocationListener() {
+    private BDLocationListener mListener = new BDLocationListener() {
 
         @Override
         public void onReceiveLocation(BDLocation location) {
-            // TODO Auto-generated method stub
             if (null != location && location.getLocType() != BDLocation.TypeServerError) {
                 StringBuffer sb = new StringBuffer(256);
                 sb.append("time : ");
@@ -160,10 +105,11 @@ public class BaseLocationActivity extends Activity {
                 sb.append("\nPoi: ");// POI信息
                 if (location.getPoiList() != null && !location.getPoiList().isEmpty()) {
                     for (int i = 0; i < location.getPoiList().size(); i++) {
-                        Poi poi =  location.getPoiList().get(i);
+                        Poi poi = location.getPoiList().get(i);
                         sb.append(poi.getName() + ";");
                     }
                 }
+                // 构造定位数据
                 if (location.getLocType() == BDLocation.TypeGpsLocation) {// GPS定位结果
                     sb.append("\nspeed : ");
                     sb.append(location.getSpeed());// 速度 单位：km/h
@@ -175,6 +121,7 @@ public class BaseLocationActivity extends Activity {
                     sb.append(location.getGpsAccuracyStatus());// *****gps质量判断*****
                     sb.append("\ndescribe : ");
                     sb.append("gps定位成功");
+                    locSuccess(location);
                 } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {// 网络定位结果
                     // 运营商信息
                     if (location.hasAltitude()) {// *****如果有海拔高度*****
@@ -185,24 +132,49 @@ public class BaseLocationActivity extends Activity {
                     sb.append(location.getOperators());
                     sb.append("\ndescribe : ");
                     sb.append("网络定位成功");
+                    locSuccess(location);
                 } else if (location.getLocType() == BDLocation.TypeOffLineLocation) {// 离线定位结果
                     sb.append("\ndescribe : ");
                     sb.append("离线定位成功，离线定位结果也是有效的");
+                    locSuccess(location);
                 } else if (location.getLocType() == BDLocation.TypeServerError) {
                     sb.append("\ndescribe : ");
                     sb.append("服务端网络定位失败，可以反馈IMEI号和大体定位时间到loc-bugs@baidu.com，会有人追查原因");
+                    locFail();
                 } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
                     sb.append("\ndescribe : ");
                     sb.append("网络不同导致定位失败，请检查网络是否通畅");
+                    locFail();
                 } else if (location.getLocType() == BDLocation.TypeCriteriaException) {
                     sb.append("\ndescribe : ");
                     sb.append("无法获取有效定位依据导致定位失败，一般是由于手机的原因，处于飞行模式下一般会造成这种结果，可以试着重启手机");
+                    locFail();
+                } else {
+                    locFail();
                 }
                 logMsg(sb.toString());
+            } else {
+                locFail();
             }
         }
 
     };
+
+    public void locFail() {
+
+    }
+
+    public void logMsg(String s) {
+
+    }
+
+
+    public void locSuccess(BDLocation location) {
+
+    }
+
+
+
 
 
 }
