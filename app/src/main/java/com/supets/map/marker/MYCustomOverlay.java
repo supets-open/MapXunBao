@@ -76,6 +76,15 @@ public class MYCustomOverlay extends OverlayManager implements BaiduMap.OnMarker
         return list;
     }
 
+
+    public OverlayOptions  buildMarker(LatLng  point,int id){
+        return  new MarkerOptions()
+                .position(point)
+                .icon(BitmapDescriptorFactory.fromResource(id))
+                .zIndex(9)  //设置marker所在层级
+                .draggable(true);  //设置手势拖拽
+    }
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         String name = "test";

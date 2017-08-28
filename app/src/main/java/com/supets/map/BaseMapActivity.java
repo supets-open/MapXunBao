@@ -19,6 +19,7 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Projection;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.inner.GeoPoint;
@@ -73,6 +74,11 @@ public class BaseMapActivity extends BaseLocationActivity {
             public void onMapStatusChangeFinish(MapStatus status) {
                 LatLng _latLng = status.target;
                 System.out.println(_latLng.latitude + "," + _latLng.longitude);
+
+                markerManager.removeFromMap();
+
+                OverlayOptions options = markerManager.buildMarker(_latLng, R.mipmap.icon_markb);
+                markerManager.addData(options);
             }
         });
 
@@ -80,12 +86,22 @@ public class BaseMapActivity extends BaseLocationActivity {
         mMapView.getMap().setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
             @Override
             public void onTouch(MotionEvent motionEvent) {
-                /** 获得屏幕点击的位置 */
-                int x = (int) motionEvent.getX();
-                int y = (int) motionEvent.getY();
-                // 像素坐标转换为地址坐标
-                LatLng pt = mMapView.getMap().getProjection().fromScreenLocation(new Point(x, y));
-                Log.v("dd", x + ":" + y + ":" + pt.latitudeE6 + pt.longitudeE6);
+
+                int action = motionEvent.getAction() & MotionEvent.ACTION_MASK;
+
+                switch (action) {
+                    case MotionEvent.ACTION_UP: {
+                        /** 获得屏幕点击的位置 */
+                        int x = (int) motionEvent.getX();
+                        int y = (int) motionEvent.getY();
+                        // 像素坐标转换为地址坐标
+                        LatLng _latLng = mMapView.getMap().getProjection().fromScreenLocation(new Point(x, y));
+                        Log.v("dd", x + ":" + y + ":" + _latLng.latitude + _latLng.longitude);
+                        OverlayOptions options = markerManager.buildMarker(_latLng, R.mipmap.icon_markc);
+                        markerManager.addData(options);
+                    }
+                    break;
+                }
             }
         });
 

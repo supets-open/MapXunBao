@@ -79,6 +79,10 @@ public abstract class OverlayManager {
         }
     }
 
+    public void addData(OverlayOptions options) {
+        mOverlayList.add(mBaiduMap.addOverlay(options));
+    }
+
     /**
      * 将所有Overlay 从 地图上消除
      */
@@ -117,7 +121,7 @@ public abstract class OverlayManager {
         }
     }
 
-    public void clearAll(){
+    public void clearAll() {
         mBaiduMap.clear();
     }
 
