@@ -1,19 +1,11 @@
 package com.supets.map;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
-import com.baidu.location.Poi;
-import com.supets.map.LocationApplication;
-import com.supets.map.R;
-import com.supets.map.service.LocationService;
 
 /***
  * 单点定位示例，用来展示基本的定位结果，配置在LocationService.java中
